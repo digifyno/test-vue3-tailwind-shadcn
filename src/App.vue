@@ -240,6 +240,109 @@
         </div>
       </div>
 
+
+      <!-- Update Task Form Test -->
+      <div class="bg-card border border-border rounded-xl shadow-2xl overflow-hidden">
+        <div class="p-6 border-b border-border">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-md bg-blue-500/20 flex items-center justify-center text-blue-400 text-lg">&#x1F504;</div>
+            <div>
+              <h2 class="font-semibold text-foreground">Test: Update Task &#x2014; Conditional Fields</h2>
+              <p class="text-xs text-muted-foreground mt-0.5">Validates conditionally required fields based on task status</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <!-- Success banner -->
+          <div v-if="updateSubmitSuccess" class="mb-6 p-4 rounded-lg border border-green-500/30 bg-green-500/10 flex items-start gap-3">
+            <span class="text-green-400 text-lg flex-shrink-0">&#x2713;</span>
+            <div>
+              <p class="text-sm font-semibold text-green-300">Task updated successfully</p>
+              <p class="text-xs text-green-400/70 mt-1">Conditional fields validated correctly.</p>
+            </div>
+          </div>
+
+          <form id="update-form" @submit.prevent="handleUpdateSubmit" novalidate>
+            <div class="space-y-5">
+              <!-- Title field -->
+              <div>
+                <label for="update-title" class="block text-sm font-medium text-foreground mb-1.5">
+                  Title
+                </label>
+                <input
+                  id="update-title"
+                  v-model="updateForm.title"
+                  type="text"
+                  class="w-full px-3 py-2 rounded-md border border-input text-sm bg-background text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                />
+              </div>
+
+              <!-- Status field -->
+              <div>
+                <label for="update-status" class="block text-sm font-medium text-foreground mb-1.5">
+                  Status <span class="text-destructive">*</span>
+                </label>
+                <select
+                  id="update-status"
+                  v-model="updateForm.status"
+                  class="w-full px-3 py-2 rounded-md border border-input text-sm bg-background text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="blocked">Blocked</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+
+              <!-- Blocked Reason (conditional: only shown/required when status is blocked) -->
+              <div v-if="updateForm.status === 'blocked'">
+                <label for="update-blocked-reason" class="block text-sm font-medium text-foreground mb-1.5">
+                  Blocked Reason <span class="text-destructive">*</span>
+                  <span class="text-xs text-muted-foreground font-normal ml-1">(required when blocked)</span>
+                </label>
+                <textarea
+                  id="update-blocked-reason"
+                  v-model="updateForm.blockedReason"
+                  rows="2"
+                  aria-required="true"
+                  placeholder="Describe why the task is blocked"
+                  :class="[
+                    'w-full px-3 py-2 rounded-md border text-sm bg-background text-foreground placeholder:text-muted-foreground transition-colors resize-none',
+                    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+                    updateErrors.blockedReason ? 'border-destructive bg-destructive/5' : 'border-input'
+                  ]"
+                  @blur="updateTouched.blockedReason = true"
+                ></textarea>
+                <p v-if="updateErrors.blockedReason" class="mt-1.5 text-xs text-destructive flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  {{ updateErrors.blockedReason }}
+                </p>
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex items-center gap-3 pt-2">
+                <button
+                  type="submit"
+                  class="px-5 py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-colors"
+                >
+                  Update Task
+                </button>
+                <button
+                  type="button"
+                  @click="resetUpdateForm"
+                  class="px-5 py-2.5 rounded-md bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-colors"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- Footer note -->
       <p class="text-center text-xs text-muted-foreground">
         Test: Vue 3 + Tailwind + shadcn &mdash; RSI Platform end-to-end test product
@@ -379,5 +482,55 @@ function resetForm() {
   touched.category = false
   submitAttempted.value = false
   submitSuccess.value = false
+}
+
+// Update Task — Conditional Fields state
+const updateForm = reactive({
+  title: 'Fix login bug',
+  status: 'pending',
+  blockedReason: ''
+})
+
+const updateTouched = reactive({
+  blockedReason: false
+})
+
+const updateSubmitAttempted = ref(false)
+const updateSubmitSuccess = ref(false)
+
+function validateUpdate(): Record<string, string> {
+  const errs: Record<string, string> = {}
+  if (updateForm.status === 'blocked' && !updateForm.blockedReason.trim()) {
+    errs.blockedReason = 'Blocked reason is required when status is Blocked'
+  }
+  return errs
+}
+
+const updateErrors = computed(() => {
+  if (!updateSubmitAttempted.value) {
+    const errs: Record<string, string> = {}
+    const all = validateUpdate()
+    if (updateTouched.blockedReason && all.blockedReason) errs.blockedReason = all.blockedReason
+    return errs
+  }
+  return validateUpdate()
+})
+
+function handleUpdateSubmit() {
+  updateSubmitAttempted.value = true
+  updateSubmitSuccess.value = false
+  const errs = validateUpdate()
+  if (Object.keys(errs).length === 0) {
+    updateSubmitSuccess.value = true
+  }
+}
+
+function resetUpdateForm() {
+  updateForm.title = 'Fix login bug'
+  updateForm.status = 'pending'
+  updateForm.blockedReason = ''
+  updateTouched.blockedReason = false
+  updateSubmitAttempted.value = false
+  updateSubmitSuccess.value = false
 }
 </script>

@@ -101,3 +101,61 @@ describe('Create Task — Required Fields', () => {
     expect(wrapper.text()).toContain('Validation Results')
   })
 })
+
+describe('Update Task — Conditional Fields', () => {
+  it('does not show blocked reason field when status is pending', () => {
+    const wrapper = mount(App)
+    expect(wrapper.find('#update-blocked-reason').exists()).toBe(false)
+  })
+
+  it('shows blocked reason field when status is changed to blocked', async () => {
+    const wrapper = mount(App)
+    await wrapper.find('#update-status').setValue('blocked')
+    expect(wrapper.find('#update-blocked-reason').exists()).toBe(true)
+  })
+
+  it('shows error for blocked reason when submitting with blocked status and empty reason', async () => {
+    const wrapper = mount(App)
+    await wrapper.find('#update-status').setValue('blocked')
+    await wrapper.find('#update-form').trigger('submit')
+    expect(wrapper.find('#update-blocked-reason').classes()).toContain('border-destructive')
+    expect(wrapper.text()).toContain('Blocked reason is required')
+  })
+
+  it('does not show blocked reason error when status is not blocked', async () => {
+    const wrapper = mount(App)
+    await wrapper.find('#update-form').trigger('submit')
+    expect(wrapper.text()).not.toContain('Blocked reason is required')
+  })
+
+  it('allows submit when status is blocked and blocked reason is provided', async () => {
+    const wrapper = mount(App)
+    await wrapper.find('#update-status').setValue('blocked')
+    await wrapper.find('#update-blocked-reason').setValue('Waiting for API credentials')
+    await wrapper.find('#update-form').trigger('submit')
+    expect(wrapper.text()).toContain('Task updated successfully')
+  })
+
+  it('allows submit when status is not blocked (no blocked reason needed)', async () => {
+    const wrapper = mount(App)
+    await wrapper.find('#update-status').setValue('in_progress')
+    await wrapper.find('#update-form').trigger('submit')
+    expect(wrapper.text()).toContain('Task updated successfully')
+  })
+
+  it('does not show success message when blocked reason is missing', async () => {
+    const wrapper = mount(App)
+    await wrapper.find('#update-status').setValue('blocked')
+    await wrapper.find('#update-form').trigger('submit')
+    expect(wrapper.text()).not.toContain('Task updated successfully')
+  })
+
+  it('clears blocked reason error when reason is filled in', async () => {
+    const wrapper = mount(App)
+    await wrapper.find('#update-status').setValue('blocked')
+    await wrapper.find('#update-form').trigger('submit')
+    expect(wrapper.text()).toContain('Blocked reason is required')
+    await wrapper.find('#update-blocked-reason').setValue('Waiting for API keys')
+    expect(wrapper.text()).not.toContain('Blocked reason is required')
+  })
+})
