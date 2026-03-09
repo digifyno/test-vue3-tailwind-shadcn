@@ -89,6 +89,16 @@
 
           <form @submit.prevent="handleSubmit" novalidate>
             <div class="space-y-5">
+              <!-- Required fields progress -->
+              <div class="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                <div class="flex gap-1">
+                  <span v-for="i in 3" :key="i"
+                    :class="['w-6 h-1.5 rounded-full transition-colors', i <= requiredFilled ? 'bg-violet-500' : 'bg-secondary']">
+                  </span>
+                </div>
+                <span>{{ requiredFilled }}/3 required fields</span>
+              </div>
+
               <!-- Title field (required) -->
               <div>
                 <label for="task-title" class="block text-sm font-medium text-foreground mb-1.5">
@@ -98,6 +108,7 @@
                   id="task-title"
                   v-model="form.title"
                   type="text"
+                  aria-required="true"
                   placeholder="Enter task title"
                   :class="[
                     'w-full px-3 py-2 rounded-md border text-sm bg-background text-foreground placeholder:text-muted-foreground transition-colors',
@@ -123,6 +134,7 @@
                   id="task-description"
                   v-model="form.description"
                   rows="3"
+                  aria-required="true"
                   placeholder="Describe the task"
                   :class="[
                     'w-full px-3 py-2 rounded-md border text-sm bg-background text-foreground placeholder:text-muted-foreground transition-colors resize-none',
@@ -147,6 +159,7 @@
                 <select
                   id="task-category"
                   v-model="form.category"
+                  aria-required="true"
                   :class="[
                     'w-full px-3 py-2 rounded-md border text-sm bg-background text-foreground transition-colors',
                     'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
@@ -331,6 +344,10 @@ const errors = computed(() => {
   }
   return validate()
 })
+
+const requiredFilled = computed(() =>
+  [!!form.title.trim(), !!form.description.trim(), !!form.category].filter(Boolean).length
+)
 
 const validationSummary = computed(() => [
   { name: 'title', label: 'Title', required: true, valid: !!form.title.trim() },
