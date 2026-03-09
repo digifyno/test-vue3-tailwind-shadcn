@@ -6,7 +6,7 @@
       End-to-End Test Environment
     </div>
 
-    <div class="max-w-3xl w-full">
+    <div class="max-w-3xl w-full space-y-6">
       <!-- Hero card -->
       <div class="bg-card border border-border rounded-xl shadow-2xl overflow-hidden">
         <!-- Hero header -->
@@ -65,8 +65,170 @@
         </div>
       </div>
 
+      <!-- Create Task Form Test -->
+      <div class="bg-card border border-border rounded-xl shadow-2xl overflow-hidden">
+        <div class="p-6 border-b border-border">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-md bg-violet-500/20 flex items-center justify-center text-violet-400 text-lg">&#x2705;</div>
+            <div>
+              <h2 class="font-semibold text-foreground">Test: Create Task &#x2014; Required Fields</h2>
+              <p class="text-xs text-muted-foreground mt-0.5">Validates required field enforcement and form submission</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <!-- Success banner -->
+          <div v-if="submitSuccess" class="mb-6 p-4 rounded-lg border border-green-500/30 bg-green-500/10 flex items-start gap-3">
+            <span class="text-green-400 text-lg flex-shrink-0">&#x2713;</span>
+            <div>
+              <p class="text-sm font-semibold text-green-300">Task created successfully</p>
+              <p class="text-xs text-green-400/70 mt-1">All required fields were present. Form submitted correctly.</p>
+            </div>
+          </div>
+
+          <form @submit.prevent="handleSubmit" novalidate>
+            <div class="space-y-5">
+              <!-- Title field (required) -->
+              <div>
+                <label for="task-title" class="block text-sm font-medium text-foreground mb-1.5">
+                  Title <span class="text-destructive">*</span>
+                </label>
+                <input
+                  id="task-title"
+                  v-model="form.title"
+                  type="text"
+                  placeholder="Enter task title"
+                  :class="[
+                    'w-full px-3 py-2 rounded-md border text-sm bg-background text-foreground placeholder:text-muted-foreground transition-colors',
+                    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+                    errors.title ? 'border-destructive bg-destructive/5' : 'border-input'
+                  ]"
+                  @blur="touchField('title')"
+                />
+                <p v-if="errors.title" class="mt-1.5 text-xs text-destructive flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  {{ errors.title }}
+                </p>
+              </div>
+
+              <!-- Description field (required) -->
+              <div>
+                <label for="task-description" class="block text-sm font-medium text-foreground mb-1.5">
+                  Description <span class="text-destructive">*</span>
+                </label>
+                <textarea
+                  id="task-description"
+                  v-model="form.description"
+                  rows="3"
+                  placeholder="Describe the task"
+                  :class="[
+                    'w-full px-3 py-2 rounded-md border text-sm bg-background text-foreground placeholder:text-muted-foreground transition-colors resize-none',
+                    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+                    errors.description ? 'border-destructive bg-destructive/5' : 'border-input'
+                  ]"
+                  @blur="touchField('description')"
+                ></textarea>
+                <p v-if="errors.description" class="mt-1.5 text-xs text-destructive flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  {{ errors.description }}
+                </p>
+              </div>
+
+              <!-- Category field (required) -->
+              <div>
+                <label for="task-category" class="block text-sm font-medium text-foreground mb-1.5">
+                  Category <span class="text-destructive">*</span>
+                </label>
+                <select
+                  id="task-category"
+                  v-model="form.category"
+                  :class="[
+                    'w-full px-3 py-2 rounded-md border text-sm bg-background text-foreground transition-colors',
+                    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+                    errors.category ? 'border-destructive bg-destructive/5' : 'border-input'
+                  ]"
+                  @blur="touchField('category')"
+                  @change="touchField('category')"
+                >
+                  <option value="">Select a category&hellip;</option>
+                  <option value="feature">Feature</option>
+                  <option value="bugfix">Bug Fix</option>
+                  <option value="refactor">Refactor</option>
+                  <option value="performance">Performance</option>
+                  <option value="security">Security</option>
+                </select>
+                <p v-if="errors.category" class="mt-1.5 text-xs text-destructive flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  {{ errors.category }}
+                </p>
+              </div>
+
+              <!-- Priority field (optional) -->
+              <div>
+                <label for="task-priority" class="block text-sm font-medium text-foreground mb-1.5">
+                  Priority
+                  <span class="text-xs text-muted-foreground font-normal ml-1">(optional)</span>
+                </label>
+                <select
+                  id="task-priority"
+                  v-model="form.priority"
+                  class="w-full px-3 py-2 rounded-md border border-input text-sm bg-background text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                >
+                  <option value="">No priority</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+
+              <!-- Submit button -->
+              <div class="flex items-center gap-3 pt-2">
+                <button
+                  type="submit"
+                  class="px-5 py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-colors"
+                >
+                  Create Task
+                </button>
+                <button
+                  type="button"
+                  @click="resetForm"
+                  class="px-5 py-2.5 rounded-md bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-colors"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Test result summary -->
+          <div v-if="submitAttempted" class="mt-6 pt-6 border-t border-border">
+            <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Validation Results</h3>
+            <div class="space-y-2">
+              <div v-for="field in validationSummary" :key="field.name"
+                   class="flex items-center gap-2.5 text-sm">
+                <span :class="field.valid ? 'text-green-400' : 'text-destructive'">
+                  {{ field.valid ? '&#x2713;' : '&#x2717;' }}
+                </span>
+                <span class="text-foreground font-medium">{{ field.label }}</span>
+                <span class="text-muted-foreground text-xs">
+                  {{ field.valid ? 'OK' : field.required ? 'Required &mdash; missing' : 'Optional &mdash; skipped' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Footer note -->
-      <p class="text-center text-xs text-muted-foreground mt-6">
+      <p class="text-center text-xs text-muted-foreground">
         Test: Vue 3 + Tailwind + shadcn &mdash; RSI Platform end-to-end test product
       </p>
     </div>
@@ -74,39 +236,41 @@
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, computed } from 'vue'
+
 const stackItems = [
   {
-    icon: '⚡',
+    icon: '&#x26A1;',
     iconBg: 'bg-green-500/20 text-green-400',
     title: 'Vue 3.4+',
-    description: 'Composition API with <script setup> and full TypeScript support'
+    description: 'Composition API with script setup and full TypeScript support'
   },
   {
-    icon: '🎨',
+    icon: '&#x1F3A8;',
     iconBg: 'bg-sky-500/20 text-sky-400',
     title: 'Tailwind CSS 3.4+',
     description: 'Utility-first styling with dark mode and responsive design'
   },
   {
-    icon: '🧩',
+    icon: '&#x1F9E9;',
     iconBg: 'bg-violet-500/20 text-violet-400',
     title: 'shadcn-vue',
     description: 'Pre-configured design system variables and component-ready setup'
   },
   {
-    icon: '🔷',
+    icon: '&#x1F537;',
     iconBg: 'bg-blue-500/20 text-blue-400',
     title: 'TypeScript 5.4+',
     description: 'Strict mode enabled with full type safety across the project'
   },
   {
-    icon: '🚀',
+    icon: '&#x1F680;',
     iconBg: 'bg-orange-500/20 text-orange-400',
     title: 'Vite 5.2+',
     description: 'Lightning-fast HMR and optimized production builds'
   },
   {
-    icon: '📦',
+    icon: '&#x1F4E6;',
     iconBg: 'bg-pink-500/20 text-pink-400',
     title: 'PostCSS + Autoprefixer',
     description: 'Modern CSS pipeline with cross-browser compatibility'
@@ -130,4 +294,73 @@ const links = [
     class: 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
   }
 ]
+
+// Form state
+const form = reactive({
+  title: '',
+  description: '',
+  category: '',
+  priority: ''
+})
+
+const touched = reactive({
+  title: false,
+  description: false,
+  category: false
+})
+
+const submitAttempted = ref(false)
+const submitSuccess = ref(false)
+
+function validate(): Record<string, string> {
+  const errs: Record<string, string> = {}
+  if (!form.title.trim()) errs.title = 'Title is required'
+  if (!form.description.trim()) errs.description = 'Description is required'
+  if (!form.category) errs.category = 'Category is required'
+  return errs
+}
+
+const errors = computed(() => {
+  if (!submitAttempted.value) {
+    const errs: Record<string, string> = {}
+    const all = validate()
+    if (touched.title && all.title) errs.title = all.title
+    if (touched.description && all.description) errs.description = all.description
+    if (touched.category && all.category) errs.category = all.category
+    return errs
+  }
+  return validate()
+})
+
+const validationSummary = computed(() => [
+  { name: 'title', label: 'Title', required: true, valid: !!form.title.trim() },
+  { name: 'description', label: 'Description', required: true, valid: !!form.description.trim() },
+  { name: 'category', label: 'Category', required: true, valid: !!form.category },
+  { name: 'priority', label: 'Priority', required: false, valid: true }
+])
+
+function touchField(field: 'title' | 'description' | 'category') {
+  touched[field] = true
+}
+
+function handleSubmit() {
+  submitAttempted.value = true
+  submitSuccess.value = false
+  const errs = validate()
+  if (Object.keys(errs).length === 0) {
+    submitSuccess.value = true
+  }
+}
+
+function resetForm() {
+  form.title = ''
+  form.description = ''
+  form.category = ''
+  form.priority = ''
+  touched.title = false
+  touched.description = false
+  touched.category = false
+  submitAttempted.value = false
+  submitSuccess.value = false
+}
 </script>
